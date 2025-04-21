@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resourced-pod
+  namespace: monitoring
+  labels:
+    app: resourced-pod
+spec:
+  containers:
+    - name: demo-container
+      image: busybox
+      command: ["sh", "-c", "sleep 300"]
+      resources:
+        requests:
+          cpu: "250m"        # 0.25 CPU
+          memory: "128Mi"    # 128 MiB RAM
+        limits:
+          cpu: "500m"
+          memory: "256Mi"
+

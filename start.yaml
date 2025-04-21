@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: succeeded-pod
+  namespace: monitoring
+  labels:
+    app: test-succeeded
+spec:
+  containers:
+    - name: succeed-container
+      image: busybox
+      command: ["sh", "-c", "echo Hello from succeeded pod && exit 0"]
+  restartPolicy: Never
+

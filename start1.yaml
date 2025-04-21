@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: failed-pod
+  namespace: monitoring
+  labels:
+    app: test-failed
+spec:
+  containers:
+    - name: fail-container
+      image: busybox
+      command: ["sh", "-c", "echo This pod will fail && exit 1"]
+  restartPolicy: Never
+

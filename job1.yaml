@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: failed-job
+  namespace: monitoring
+spec:
+  template:
+    metadata:
+      labels:
+        app: failed-job
+    spec:
+      containers:
+        - name: fail
+          image: busybox
+          command: ["sh", "-c", "echo This job will fail && exit 1"]
+      restartPolicy: Never
+
