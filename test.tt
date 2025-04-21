@@ -1,0 +1,1 @@
+count by(namespace) (rate(kube_pod_container_status_running{namespace=~"$namespace"}[$__rate_interval]))
