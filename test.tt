@@ -1,1 +1,173 @@
-count by(namespace) (rate(kube_pod_container_status_running{namespace=~"$namespace"}[$__rate_interval]))
+{
+  "id": 16,
+  "type": "table",
+  "title": "Deployment Replicas - Up To Date",
+  "gridPos": {
+    "x": 0,
+    "y": 43,
+    "h": 5,
+    "w": 6
+  },
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "align": "auto",
+        "cellOptions": {
+          "type": "auto"
+        },
+        "inspect": false
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      }
+    },
+    "overrides": [
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Time"
+        },
+        "properties": [
+          {
+            "id": "displayName",
+            "value": "Time"
+          },
+          {
+            "id": "unit",
+            "value": "time: YYYY-MM-DD HH:mm:ss"
+          },
+          {
+            "id": "custom.align"
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Metric"
+        },
+        "properties": [
+          {
+            "id": "unit",
+            "value": "none"
+          },
+          {
+            "id": "custom.cellOptions",
+            "value": {
+              "type": "color-background"
+            }
+          },
+          {
+            "id": "custom.align"
+          },
+          {
+            "id": "thresholds",
+            "value": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "rgba(245, 54, 54, 0.9)",
+                  "value": null
+                },
+                {
+                  "color": "rgba(237, 129, 40, 0.89)",
+                  "value": 0
+                },
+                {
+                  "color": "rgba(50, 172, 45, 0.97)",
+                  "value": 0
+                },
+                {}
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "id": "byName",
+          "options": "Value"
+        },
+        "properties": [
+          {
+            "id": "unit",
+            "value": "none"
+          },
+          {
+            "id": "custom.cellOptions",
+            "value": {
+              "type": "color-background"
+            }
+          },
+          {
+            "id": "custom.align"
+          },
+          {
+            "id": "thresholds",
+            "value": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "rgba(245, 54, 54, 0.9)",
+                  "value": null
+                },
+                {
+                  "color": "rgba(237, 129, 40, 0.89)",
+                  "value": 0
+                },
+                {
+                  "color": "rgba(50, 172, 45, 0.97)",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "pluginVersion": "11.6.0",
+  "targets": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "beiv6meujn474c"
+      },
+      "expr": "kube_deployment_status_replicas{namespace=~\"$namespace\"}",
+      "format": "time_series",
+      "instant": true,
+      "interval": "",
+      "intervalFactor": 1,
+      "legendFormat": "{{ deployment }}",
+      "refId": "A"
+    }
+  ],
+  "datasource": {
+    "type": "prometheus",
+    "uid": "beiv6meujn474c"
+  },
+  "options": {
+    "showHeader": true,
+    "cellHeight": "sm",
+    "footer": {
+      "show": false,
+      "reducer": [
+        "sum"
+      ],
+      "countRows": false,
+      "fields": ""
+    },
+    "frameIndex": 6
+  }
+}
