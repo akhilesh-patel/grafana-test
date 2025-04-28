@@ -1,0 +1,51 @@
+receivers:
+  docker_stats:
+    endpoint: "unix:///var/run/docker.sock"
+    timeout: 5s
+    collection_interval: 15s
+
+  filelog:
+    include: ["/var/lib/docker/containers/*/*-json.log"]
+    start_at: beginning
+    operators:
+      - type: json_parser
+        id: parse_docker_json
+        parse_from: body
+        timestamp:
+          parse_from: attributes.time
+          layout: "%Y-%m-%dT%H:%M:%S.%fZ"
+
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu:
+      memory:
+      disk:
+      filesystem:
+      load:
+      network:
+      paging:
+      processes:
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: http://signoz-otel-collector:4317
+    timeout: 5s
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [docker_stats, hostmetrics]
+      processors: [batch]
+      exporters: [otlp]
+
+    logs:
+      receivers: [filelog]
+      processors: [batch]
+      exporters: [otlp]
+

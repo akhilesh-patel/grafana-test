@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  apache-server:
+    build: .
+    container_name: apache-container
+    ports:
+      - "8081:80"
+    networks:
+      - signoz-net
+
+networks:
+  signoz-net:
+    external: true
+
