@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    user: "0"
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - HOSTNAME=${HOSTNAME_OVERRIDE}
+      - SERVICE_NAME=${SERVICE_NAME}
+      - SERVICE_ENV=${SERVICE_ENV}
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    restart: always
+

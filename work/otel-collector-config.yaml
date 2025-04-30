@@ -1,0 +1,48 @@
+receivers:
+  filelog:
+    include: [/var/lib/docker/containers/*/*.log]
+    start_at: beginning
+    poll_interval: 5s
+    include_file_path: true
+    include_file_name: true
+    operators:
+      - type: json_parser
+        parse_from: body
+        if: 'body matches "^\\{"'
+      - type: regex_parser
+        regex: '^(?P<message>.*)$'
+        parse_from: body
+
+  docker_stats:
+    endpoint: "unix:///var/run/docker.sock"
+    collection_interval: 10s
+
+processors:
+  resource:
+    attributes:
+      - key: host.name
+        action: insert
+        value: ${HOSTNAME}
+
+exporters:
+  otlp:
+    endpoint: 13.203.160.238:4317
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: [resource]
+      exporters: [otlp]
+
+    metrics:
+      receivers: [docker_stats]
+      processors: [resource]
+      exporters: [otlp]
+
+  telemetry:
+    logs:
+      level: "debug"
+
