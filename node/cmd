@@ -1,0 +1,3 @@
+npm init -y
+npm install express @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node @opentelemetry/exporter-trace-otlp-grpc
+

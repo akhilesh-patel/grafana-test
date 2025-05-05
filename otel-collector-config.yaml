@@ -9,30 +9,61 @@ receivers:
     start_at: beginning
     operators:
       - type: json_parser
-        id: parse_docker_json
+        id: extract_outer_log
         parse_from: body
         timestamp:
           parse_from: attributes.time
           layout: "%Y-%m-%dT%H:%M:%S.%fZ"
+        attributes:
+          - from: attributes.log
+            to: attributes.log
 
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      cpu:
-      memory:
-      disk:
-      filesystem:
-      load:
-      network:
-      paging:
-      processes:
+      - type: json_parser
+        id: extract_inner_log
+        parse_from: attributes.log
+        severity:
+          parse_from: attributes.severity_text
+        body: attributes.body
+        attributes:
+          - key: severity_text
+            from: attributes.severity_text
+          - key: severity_number
+            from: attributes.severity_number
+
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4317"  # OpenTelemetry OTLP receiver (trace and metric collection)
 
 processors:
   batch:
 
+  transform:
+    log_statements:
+      - context: log
+        statements:
+          - set(severity_text, "ERROR") where body == "This is a test error log from container"
+          - set(severity_text, "WARNING") where body == "This is a test error log from container"
+
+  resourcedetection:
+    detectors: [env, system]
+    override: true
+
+  resource:
+    attributes:
+      - key: service.name
+        from_attribute: service.name
+        action: upsert
+      - key: host.name
+        from_attribute: host.name
+        action: upsert
+      - key: deployment.environment
+        from_attribute: deployment.environment
+        action: upsert
+
 exporters:
   otlp:
-    endpoint: http://signoz-otel-collector:4317
+    endpoint: http://signoz-otel-collector:4317  # Send data to SigNoz OpenTelemetry Collector
     timeout: 5s
     tls:
       insecure: true
@@ -40,12 +71,17 @@ exporters:
 service:
   pipelines:
     metrics:
-      receivers: [docker_stats, hostmetrics]
-      processors: [batch]
+      receivers: [docker_stats]
+      processors: [resourcedetection, resource, batch]
       exporters: [otlp]
 
     logs:
       receivers: [filelog]
-      processors: [batch]
+      processors: [transform, resourcedetection, resource, batch]
       exporters: [otlp]
+
+    traces:  # Add traces pipeline
+      receivers: [otlp]  # Receive traces via OTLP (gRPC)
+      processors: [batch, resourcedetection, resource]  # Use the same processors for traces
+      exporters: [otlp]  # Export traces to SigNoz
 

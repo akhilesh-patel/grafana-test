@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  hh:
+    container_name: hh
+    hostname: otel-host-machine-2  # ✅ Fixed static hostname
+    image: otel/opentelemetry-collector-contrib:latest
+    restart: unless-stopped
+    networks:
+      - signoz-net
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./otel-collector-config.yaml:/otel-config.yaml
+    command: ["--config", "/otel-config.yaml"]
+    user: "0:0"
+    env_file:
+      - .env
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=${SERVICE_NAME},deployment.environment=${DEPLOYMENT_ENV}
+
+networks:
+  signoz-net:
+    external: true
+

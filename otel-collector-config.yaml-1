@@ -1,0 +1,63 @@
+receivers:
+  docker_stats:
+    endpoint: "unix:///var/run/docker.sock"
+    timeout: 5s
+    collection_interval: 15s
+
+  filelog:
+    include: ["/var/lib/docker/containers/*/*-json.log"]
+    start_at: beginning
+    operators:
+      - type: json_parser
+        id: extract_outer_log
+        parse_from: body
+        timestamp:
+          parse_from: attributes.time
+          layout: "%Y-%m-%dT%H:%M:%S.%fZ"
+        attributes:
+          - from: attributes.log
+            to: attributes.log  # inner log still as a string
+
+      - type: json_parser
+        id: extract_inner_log
+        parse_from: attributes.log
+        severity:
+          parse_from: attributes.severity_text
+        body: attributes.body
+        attributes:
+          - key: service.name
+            from: attributes.service.name
+          - key: severity_text
+            from: attributes.severity_text
+          - key: severity_number
+            from: attributes.severity_number
+
+processors:
+  batch:
+
+  transform:
+    log_statements:
+      - context: log
+        statements:
+          - set(severity_text, "ERROR") where body == "This is a test error log from container"
+          - set(severity_text, "WARNING") where body == "This is a test error log from container"
+
+exporters:
+  otlp:
+    endpoint: http://signoz-otel-collector:4317
+    timeout: 5s
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [docker_stats]
+      processors: [batch]
+      exporters: [otlp]
+
+    logs:
+      receivers: [filelog]
+      processors: [transform, batch]
+      exporters: [otlp]
+

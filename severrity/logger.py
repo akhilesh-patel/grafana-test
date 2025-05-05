@@ -1,0 +1,42 @@
+import time
+import json
+import sys
+
+# Log formats for different severities
+log_error = {
+    "severity_text": "ERROR",
+    "severity_number": 17,
+    "body": "This is a test error log from container",
+    "service.name": "test-service"
+}
+
+log_warning = {
+    "severity_text": "WARNING",
+    "severity_number": 9,
+    "body": "This is a test warning log from container",
+    "service.name": "test-service"
+}
+
+log_info = {
+    "severity_text": "INFO",
+    "severity_number": 5,
+    "body": "This is a test info log from container",
+    "service.name": "test-service"
+}
+
+log_success = {
+    "severity_text": "SUCCESS",
+    "severity_number": 0,
+    "body": "This is a test success log from container",
+    "service.name": "test-service"
+}
+
+# List of logs to generate in a loop
+logs = [log_error, log_warning, log_info, log_success]
+
+while True:
+    for log_entry in logs:
+        print(json.dumps(log_entry))  # Print log in JSON format
+        sys.stdout.flush()  # Ensure logs are flushed to stdout
+        time.sleep(5)  # Delay between each log output
+
